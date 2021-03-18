@@ -42,10 +42,8 @@ import org.killbill.billing.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.billing.osgi.libs.killbill.OSGIKillbillClock;
 import org.killbill.billing.payment.api.PaymentApiException;
 import org.killbill.billing.payment.api.PaymentMethod;
-import org.killbill.billing.payment.api.PaymentOptions;
 import org.killbill.billing.payment.api.PluginProperty;
 import org.killbill.billing.plugin.api.PluginCallContext;
-import org.killbill.billing.plugin.api.PluginProperties;
 import org.killbill.billing.plugin.api.core.PluginPaymentOptions;
 import org.killbill.billing.plugin.api.payment.PluginPaymentMethodPlugin;
 import org.killbill.billing.tenant.api.Tenant;
@@ -108,26 +106,36 @@ public class DepositServlet {
                 invoice = killbillAPI.getInvoiceUserApi().getInvoiceByNumber(invoiceDepositJson.invoiceNumber, callContext);
             } catch (final InvoiceApiException e) {
                 if (e.getCode() == ErrorCode.INVOICE_NOT_FOUND.getCode()) {
-                    logger.info("Invoice not found for invoiceId='{}'", invoiceDepositJson.invoiceNumber);
+                    logger.info("Invoice not found for invoiceNumber='{}'", invoiceDepositJson.invoiceNumber);
                     return Results.with(Status.NOT_FOUND);
                 } else {
-                    logger.warn("Error retrieving invoiceId='{}'", invoiceDepositJson.invoiceNumber, e);
+                    logger.warn("Error retrieving invoiceNumber='{}'", invoiceDepositJson.invoiceNumber, e);
                     return Results.with(Status.SERVER_ERROR);
                 }
             }
 
-            killbillAPI.getInvoicePaymentApi().createPurchaseForInvoicePayment(account,
-                                                                               invoice.getId(),
-                                                                               depositPaymentMethodId,
-                                                                               null,
-                                                                               invoiceDepositJson.paymentAmount,
-                                                                               invoice.getCurrency(),
-                                                                               depositJson.effectiveDate,
-                                                                               null,
-                                                                               null,
-                                                                               purchasePluginProperties,
-                                                                               new PluginPaymentOptions(),
-                                                                               callContext);
+            try {
+                killbillAPI.getInvoicePaymentApi().createPurchaseForInvoicePayment(account,
+                                                                                   invoice.getId(),
+                                                                                   depositPaymentMethodId,
+                                                                                   null,
+                                                                                   invoiceDepositJson.paymentAmount,
+                                                                                   invoice.getCurrency(),
+                                                                                   depositJson.effectiveDate,
+                                                                                   null,
+                                                                                   null,
+                                                                                   purchasePluginProperties,
+                                                                                   new PluginPaymentOptions(),
+                                                                                   callContext);
+            } catch (final PaymentApiException e) {
+                if (e.getCode() == ErrorCode.PAYMENT_PLUGIN_API_ABORTED.getCode()) {
+                    logger.info("Payment aborted for invoiceNumber='{}'", invoiceDepositJson.invoiceNumber);
+                    return Results.with(Status.UNPROCESSABLE_ENTITY);
+                } else {
+                    logger.warn("Error paying invoiceNumber='{}'", invoiceDepositJson.invoiceNumber, e);
+                    return Results.with(Status.SERVER_ERROR);
+                }
+            }
         }
 
         return Results.with(Status.CREATED);

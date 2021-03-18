@@ -21,6 +21,32 @@ Locally:
 kpm install_java_plugin deposit --from-source-file target/deposit-*-SNAPSHOT.jar --destination /var/tmp/bundles
 ```
 
+## Configuration
+
+Configure minimum payment amounts in the plugin:
+
+```
+curl -v \
+     -X POST \
+     -u admin:password \
+     -H 'X-Killbill-ApiKey: bob' \
+     -H 'X-Killbill-ApiSecret: lazar' \
+     -H 'X-Killbill-CreatedBy: admin' \
+     -H 'Content-Type: text/plain' \
+     -d '!!org.killbill.billing.plugin.deposit.DepositConfiguration
+  minAmounts:
+    USD: 0.5' \
+    http://127.0.0.1:8080/1.0/kb/tenants/uploadPluginConfig/killbill-deposit
+```
+
+Make sure to enable the control plugin in Kill Bill:
+
+```
+org.killbill.payment.invoice.plugin=killbill-deposit
+```
+
+This can also be configured on a per-tenant or even per-request basis.
+
 ## Usage
 
 ```bash
