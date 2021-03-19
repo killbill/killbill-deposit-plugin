@@ -32,6 +32,7 @@ import org.killbill.billing.plugin.api.notification.PluginConfigurationEventHand
 import org.killbill.billing.plugin.core.config.PluginEnvironmentConfig;
 import org.killbill.billing.plugin.core.resources.jooby.PluginApp;
 import org.killbill.billing.plugin.core.resources.jooby.PluginAppBuilder;
+import org.killbill.billing.plugin.deposit.dao.DepositDao;
 import org.osgi.framework.BundleContext;
 
 public class DepositActivator extends KillbillActivatorBase {
@@ -55,7 +56,8 @@ public class DepositActivator extends KillbillActivatorBase {
                                                                                                    clock.getClock());
         registerPaymentControlPluginApi(context, paymentControlPluginApi);
 
-        final PaymentPluginApi paymentPluginApi = new DepositPaymentPluginApi(clock);
+        final DepositDao depositDao = new DepositDao(dataSource.getDataSource());
+        final PaymentPluginApi paymentPluginApi = new DepositPaymentPluginApi(killbillAPI, configProperties, clock.getClock(), depositDao);
         registerPaymentPluginApi(context, paymentPluginApi);
 
         final Healthcheck healthcheck = new DepositHealthcheck();

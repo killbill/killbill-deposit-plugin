@@ -24,12 +24,15 @@ import org.killbill.billing.catalog.api.Currency;
 import org.killbill.billing.osgi.libs.killbill.OSGIConfigPropertiesService;
 import org.killbill.billing.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.billing.plugin.TestUtils;
+import org.killbill.billing.plugin.deposit.dao.DepositDao;
 import org.killbill.billing.util.api.CustomFieldUserApi;
 import org.killbill.billing.util.callcontext.CallContext;
 import org.killbill.clock.ClockMock;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 
 public class TestBase {
 
@@ -39,6 +42,7 @@ public class TestBase {
     protected ClockMock clock;
     protected CallContext context;
     protected Account account;
+    protected DepositPaymentPluginApi depositPaymentPluginApi;
     protected OSGIKillbillAPI killbillApi;
     protected CustomFieldUserApi customFieldUserApi;
     protected OSGIConfigPropertiesService configPropertiesService;
@@ -56,5 +60,28 @@ public class TestBase {
         Mockito.when(killbillApi.getCustomFieldUserApi()).thenReturn(customFieldUserApi);
 
         configPropertiesService = new OSGIConfigPropertiesService(Mockito.mock(BundleContext.class));
+    }
+
+    @BeforeMethod(groups = "slow")
+    public void setUpDB() throws Exception {
+        EmbeddedDbHelper.instance().resetDB();
+
+        final DepositDao dao = EmbeddedDbHelper.instance().getDepositDao();
+        depositPaymentPluginApi = new DepositPaymentPluginApi(killbillApi,
+                                                              configPropertiesService,
+                                                              clock,
+                                                              dao);
+
+        TestUtils.updateOSGIKillbillAPI(killbillApi, depositPaymentPluginApi);
+    }
+
+    @BeforeSuite(groups = "slow")
+    public void setUpBeforeSuite() throws Exception {
+        EmbeddedDbHelper.instance().startDb();
+    }
+
+    @AfterSuite(groups = "slow")
+    public void tearDownAfterSuite() throws Exception {
+        EmbeddedDbHelper.instance().stopDB();
     }
 }

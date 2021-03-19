@@ -20,6 +20,7 @@ package org.killbill.billing.plugin.deposit;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Named;
@@ -30,6 +31,7 @@ import org.jooby.Result;
 import org.jooby.Results;
 import org.jooby.Status;
 import org.jooby.mvc.Body;
+import org.jooby.mvc.Header;
 import org.jooby.mvc.Local;
 import org.jooby.mvc.POST;
 import org.jooby.mvc.Path;
@@ -48,6 +50,8 @@ import org.killbill.billing.plugin.api.core.PluginPaymentOptions;
 import org.killbill.billing.plugin.api.payment.PluginPaymentMethodPlugin;
 import org.killbill.billing.tenant.api.Tenant;
 import org.killbill.billing.util.callcontext.CallContext;
+import org.killbill.billing.util.callcontext.CallOrigin;
+import org.killbill.billing.util.callcontext.UserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,9 +78,20 @@ public class DepositServlet {
     @POST
     @Path("/record")
     public Result recordPayments(@Body final DepositJson depositJson,
+                                 @Header("X-Request-Id") final Optional<String> xRequestId,
+                                 @Header("X-Killbill-Createdby") final Optional<String> createdBy,
+                                 @Header("X-Killbill-Reason") final Optional<String> reason,
+                                 @Header("X-Killbill-Comment") final Optional<String> comment,
                                  @Local @Named("killbill_tenant") final Tenant tenant) throws PaymentApiException {
-        final CallContext callContext = new PluginCallContext(DepositActivator.PLUGIN_NAME,
-                                                              clock.getClock().getUTCNow(),
+        final DateTime utcNow = clock.getClock().getUTCNow();
+        final CallContext callContext = new PluginCallContext(getOrCreateUserToken(xRequestId),
+                                                              createdBy.orElse(DepositActivator.PLUGIN_NAME),
+                                                              CallOrigin.EXTERNAL,
+                                                              UserType.ADMIN,
+                                                              reason.orElse(null),
+                                                              comment.orElse(null),
+                                                              utcNow,
+                                                              utcNow,
                                                               depositJson.accountId,
                                                               tenant.getId());
 
@@ -95,9 +110,14 @@ public class DepositServlet {
 
         final UUID depositPaymentMethodId = getOrCreateDepositPaymentMethod(callContext, account);
 
+        if (depositJson.paymentReferenceNumber == null || depositJson.depositType == null || depositJson.effectiveDate == null) {
+            return Results.with(Status.BAD_REQUEST);
+        }
+
         final Iterable<PluginProperty> purchasePluginProperties = ImmutableList.<PluginProperty>of(
-                new PluginProperty(DepositPaymentPluginApi.PLUGIN_PROPERTY_PAYMENT_REFERENCE_NUMBER, depositJson.paymentReferenceNumber, false),
-                new PluginProperty(DepositPaymentPluginApi.PLUGIN_PROPERTY_DEPOSIT_TYPE, depositJson.depositType, false)
+                new PluginProperty(DepositPaymentPluginApi.PLUGIN_PROPERTY_DEPOSIT_PAYMENT_REFERENCE_NUMBER, depositJson.paymentReferenceNumber, false),
+                new PluginProperty(DepositPaymentPluginApi.PLUGIN_PROPERTY_DEPOSIT_TYPE, depositJson.depositType, false),
+                new PluginProperty(DepositPaymentPluginApi.PLUGIN_PROPERTY_DEPOSIT_EFFECTIVE_DATE, depositJson.effectiveDate, false)
                                                                                                   );
 
         for (final InvoiceDepositJson invoiceDepositJson : depositJson.payments) {
@@ -165,6 +185,21 @@ public class DepositServlet {
                                                                                   callContext);
         }
         return depositPaymentMethodId;
+    }
+
+    // Use X-Request-Id if this is provided and looks like a UUID, if not allocate a random one.
+    public static UUID getOrCreateUserToken(final Optional<String> xRequestId) {
+        UUID userToken;
+        if (xRequestId.isPresent()) {
+            try {
+                userToken = UUID.fromString(xRequestId.get());
+            } catch (final IllegalArgumentException ignored) {
+                userToken = UUID.randomUUID();
+            }
+        } else {
+            userToken = UUID.randomUUID();
+        }
+        return userToken;
     }
 
     private static final class DepositJson {
