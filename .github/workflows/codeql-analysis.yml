@@ -13,14 +13,19 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
+        java-version:
+          - 8
         language: [ 'java' ]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+    - name: Setup Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java-version }}
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
       with:
