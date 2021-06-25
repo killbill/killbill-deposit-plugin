@@ -121,6 +121,10 @@ public class DepositServlet {
                                                                                                   );
 
         for (final InvoiceDepositJson invoiceDepositJson : depositJson.payments) {
+            if (invoiceDepositJson.paymentAmount == null || invoiceDepositJson.paymentAmount.compareTo(BigDecimal.ZERO) == 0) {
+                continue;
+            }
+
             final Invoice invoice;
             try {
                 invoice = killbillAPI.getInvoiceUserApi().getInvoiceByNumber(invoiceDepositJson.invoiceNumber, callContext);
