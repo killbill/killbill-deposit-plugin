@@ -13,6 +13,6 @@ jobs:
     uses: killbill/gh-actions-shared/.github/workflows/integration_test.yml@main
     with:
       plugin_name: 'deposit'
-      integration_tests_goal: 'ci:deposit'
+      integration_tests_goal: 'test:plugins:deposit'
       ddl_file: 'src/main/resources/ddl.sql'
       integration_tests_ref: 'refs/heads/work-for-release-0.23.x'
