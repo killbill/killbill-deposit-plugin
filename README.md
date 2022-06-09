@@ -5,9 +5,10 @@ Kill Bill Deposit plugin.
 
 ## Kill Bill compatibility
 
-| Plugin version | Kill Bill version  |
-| -------------: | -----------------: |
-| 0.y.z          | 0.22.z             |
+| Plugin version | Kill Bill version |
+|---------------:|------------------:|
+|          0.y.z |            0.22.z |
+|          0.1.z |            0.23.z |
 
 ## Requirements
 
