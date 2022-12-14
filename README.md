@@ -8,7 +8,7 @@ Kill Bill Deposit plugin.
 | Plugin version | Kill Bill version |
 |---------------:|------------------:|
 |          0.y.z |            0.22.z |
-|          0.1.z |            0.23.z |
+|          0.1.z |            0.24.z |
 
 ## Requirements
 
