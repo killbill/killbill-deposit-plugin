@@ -20,11 +20,11 @@
     <parent>
         <groupId>org.kill-bill.billing</groupId>
         <artifactId>killbill-oss-parent</artifactId>
-        <version>0.144.48</version>
+        <version>0.145.3-8ff3c94-SNAPSHOT</version>
     </parent>
     <groupId>org.kill-bill.billing.plugin.java</groupId>
     <artifactId>deposit-plugin</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>Kill Bill OSGI Deposit bundle</name>
     <description>Kill Bill Deposit plugin</description>
@@ -42,6 +42,7 @@
     <properties>
         <check.fail-spotbugs>true</check.fail-spotbugs>
         <check.spotbugs-exclude-filter-file>spotbugs-exclude.xml</check.spotbugs-exclude-filter-file>
+        <killbill-base-plugin.version>5.0.0-14752c2-SNAPSHOT</killbill-base-plugin.version>
         <osgi.private>org.killbill.billing.plugin.deposit.*</osgi.private>
     </properties>
     <dependencyManagement>
@@ -83,13 +84,8 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.airlift</groupId>
-            <artifactId>testing-mysql-server</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.airlift</groupId>
-            <artifactId>testing-postgresql-server</artifactId>
+            <groupId>io.zonky.test</groupId>
+            <artifactId>embedded-postgres</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -97,8 +93,8 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -118,6 +114,13 @@
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq</artifactId>
+            <exclusions>
+                <exclusion>
+                    <!-- Pulls in 1.8.0-beta4 -->
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.kill-bill.billing</groupId>
@@ -177,6 +180,16 @@
         <dependency>
             <groupId>org.kill-bill.commons</groupId>
             <artifactId>killbill-embeddeddb-common</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.kill-bill.commons</groupId>
+            <artifactId>killbill-metrics-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.kill-bill.testing</groupId>
+            <artifactId>testing-mysql-server</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

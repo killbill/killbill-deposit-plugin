@@ -1,36 +1,10 @@
-name: "CodeQL"
+name: CodeQL
 
 on:
   push:
-    branches: [ main ]
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ main ]
-  schedule:
-    - cron: '22 7 * * 6'
+  workflow_dispatch:
 
 jobs:
   analyze:
-    name: Analyze
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        java-version:
-          - 8
-        language: [ 'java' ]
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    - name: Setup Java
-      uses: actions/setup-java@v1
-      with:
-        java-version: ${{ matrix.java-version }}
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: ${{ matrix.language }}
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v1
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+    uses: killbill/gh-actions-shared/.github/workflows/codeql-analysis.yml@main
