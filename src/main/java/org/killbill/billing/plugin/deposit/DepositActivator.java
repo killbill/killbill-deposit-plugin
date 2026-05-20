@@ -20,8 +20,8 @@ package org.killbill.billing.plugin.deposit;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.http.HttpServlet;
 
 import org.killbill.billing.control.plugin.api.PaymentControlPluginApi;
 import org.killbill.billing.osgi.api.Healthcheck;

@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 
 import org.joda.time.DateTime;
 import org.jooby.Result;
@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 
 @Singleton
 @Path("/")
