@@ -23,9 +23,6 @@ import java.util.Map;
 
 import org.killbill.billing.catalog.api.Currency;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-@SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
 public class DepositConfiguration {
 
     public Map<Currency, BigDecimal> minAmounts = new HashMap<Currency, BigDecimal>();

@@ -9,6 +9,9 @@ Kill Bill Deposit plugin.
 |---------------:|------------------:|
 |          0.y.z |            0.22.z |
 |          0.1.z |            0.24.z |
+|          0.2.z |            0.26.z |
+
+The 0.2.x will use `jakarta` namespace instead of `javax`.
 
 ## Requirements
 
